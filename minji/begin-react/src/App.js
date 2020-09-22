@@ -41,8 +41,8 @@ function App() {
     },
     {
         id:3,
-        username: 'haeun',
-        email:'haeun@test.com',
+        username: 'minji2',
+        email:'minji2@test.com',
         active: false
     
     }
