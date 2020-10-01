@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-function User({ user, onRemove, onToggle }) {
-  useEffect(() => {
-    console.log('user 값이 설정됨');
-    console.log(user);
-    return () => {
-      console.log("user 가 바뀌기 전..");
-      console.log(user);
-    };
-  }, []);
+const User = React.memo(function User({ user, onRemove, onToggle }) {
+  // useEffect(() => {
+  //   console.log('user 값이 설정됨');
+  //   console.log(user);
+  //   return () => {
+  //     console.log("user 가 바뀌기 전..");
+  //     console.log(user);
+  //   };
+  // }, []);
   // active 가 바뀔 때는 두번 렌더가 일어난다
   // deps 를 생략하면 변화가 일어날때마다 리렌더
 
@@ -28,7 +28,7 @@ function User({ user, onRemove, onToggle }) {
       <button onClick={() => onRemove(user.id)}>삭제</button>
     </div>
   )
-}
+})
 
 function UserList({ users, onRemove, onToggle }) {
   return (
@@ -45,4 +45,4 @@ function UserList({ users, onRemove, onToggle }) {
   )
 }
 
-export default UserList;
+export default React.memo(UserList);
