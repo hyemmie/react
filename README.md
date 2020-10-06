@@ -1,4 +1,4 @@
-# REACT
+# 힐링 REACT 
 
 ## 10/8 목요일
 > 벨로그 https://www.notion.so/React-study-04-a5a2a3bfd3484bfab15c574df8e95e0d#a096d6016da44367b277f8a10bc171e1 </br>
