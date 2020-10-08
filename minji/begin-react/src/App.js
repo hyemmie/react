@@ -1,108 +1,135 @@
-import React, { useRef, useState } from 'react';
-import Hello from './Hello';
-import Wrapper from './Wrapper';
-import Counter from './Counter';
-import InputSample from './InputSample';
-import UserList from './UserList';
-import CreateUser from './ CreateUser';
+import React, { useRef, useReducer, useMemo, useCallback } from "react";
+import UserList from "./UserList";
+import CreateUser from "./CreateUser";
+import useInputs from './hooks/useInputs';
+
+function countActiveUsers(users) {
+  console.log("활성 사용자 수를 세는중...");
+  return users.filter((user) => user.active).length;
+}
+
+const initialState = {
+  inputs: {
+    username: "",
+    email: "",
+  },
+  users: [
+    {
+      id: 1,
+      username: "velopert",
+      email: "public.velopert@gmail.com",
+      active: true,
+    },
+    {
+      id: 2,
+      username: "tester",
+      email: "tester@example.com",
+      active: false,
+    },
+    {
+      id: 3,
+      username: "liz",
+      email: "liz@example.com",
+      active: false,
+    },
+  ],
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    // case "CHANGE_INPUT":
+    //   return {
+    //     ...state,
+    //     inputs: {
+    //       ...state.inputs,
+    //       [action.name]: action.value,
+    //     },
+    //   };
+    case "CREATE_USER":
+      return {
+        inputs: initialState.inputs,
+        users: state.users.concat(action.user),
+      };
+    case "TOGGLE_USER":
+      return {
+        ...state,
+        users: state.users.map((user) =>
+          user.id === action.id ? { ...user, active: !user.active } : user
+        ),
+      };
+    case "REMOVE_USER":
+      return {
+        ...state,
+        users: state.users.filter((user) => user.id !== action.id),
+      };
+    default:
+      return state;
+  }
+}
+
+export const UserDispatch = React.createContext(null);
 
 function App() {
-  const [inputs, setInputs] = useState({
-    username:'',
-    email:'',
+  const[{ username, email }, onChange, reset] = useInputs({
+    username: '',
+    email: ''
   });
-
-  const { username, email } = inputs;
-  const onChange = e => {
-    const{name, value} = e.target;
-    setInputs({
-      ...inputs,
-      [name]: value
-    });
-  };
-// setInputs 함수를 지정한다는게 이해가 안가여어 메서드로 지정하는건가?, 아 위에 변수지정한건 콜백함수가 아니라서 뒤에인자가 키값이 아니고 그냥 파라미터가 두개인건가요
-
-
-
-  const [users, setUsers] = useState([
-    {
-        id:1,
-        username: 'minji',
-        email:'minji@test.com',
-        active: true
-    
-    },
-    {
-        id:2,
-        username: 'kihyun',
-        email:'kihyun@test.com',
-        active: false
-    
-    },
-    {
-        id:3,
-        username: 'minji2',
-        email:'minji2@test.com',
-        active: false
-    
-    }
-]);
-
-  // const name = 'react';
-  // const style = {
-  //   backgroundColor: 'black',
-  //   color: 'aqua',
-  //   fontSize: 24,
-  //   padding: 5,
-  // }
-
+  
+  const [state, dispatch] = useReducer(reducer, initialState);
   const nextId = useRef(4);
-  const onCreate = () => {
 
-    const user = {
-      id: nextId.current,
-      username,
-      email
-    };
+  const { users } = state;
+  // const { username, email } = state.inputs;
 
-    setUsers([...users, user]);
-    // 이것두 마찬자기로 그냥  setUsers라는 변수 내에 위의 users 값들을 다 받아오는데 onCreate하면서 새로 생긴 user 객체를 함께 지정해주는것인가?
+  // const onChange = useCallback((e) => {
+  //   const { name, value } = e.target;
+  //   dispatch({
+  //     type: "CHANGE_INPUT",
+  //     name,
+  //     value,
+  //   });
+  // }, []);
 
-    setInputs({
-      username:'',
-      email:''
-      });
+  const onCreate = useCallback(() => {
+    dispatch({
+      type: "CREATE_USER",
+      user: {
+        id: nextId.current,
+        username,
+        email,
+      },
+    });
+    reset();
     nextId.current += 1;
-  }
+  }, [username, email, reset]);
+  //reset 이해가 안가여 ㅜㅜㅜ
 
-  const onRemove = id => {
-    setUsers(users.filter(user => user.id !== id));
-  };
+  // const onToggle = useCallback((id) => {
+  //   dispatch({
+  //     type: "TOGGLE_USER",
+  //     id,
+  //   });
+  // }, []);
 
-  const onToggle = id => {
-    setUsers(users.map(user => user.id === id ? {...user, active: !user.active} : user ))
-  }
+  // const onRemove = useCallback((id) => {
+  //   dispatch({
+  //     type: "REMOVE_USER",
+  //     id,
+  //   });
+  // }, []);
 
+  const count = useMemo(() => countActiveUsers(users), [users]);
   return (
-    // <Wrapper>
-    //   <>
-    //   <Hello name={name} isSpecial={true}/>
-    //   <Hello name="minji" />
-    //   <Counter />
-    //   </>
-    // </Wrapper>
-    // <InputSample />
     <>
-    <CreateUser
-      username={username}
-      email={email}
-      onChange={onChange}
-      onCreate={onCreate}
+      <CreateUser
+        username={username}
+        email={email}
+        onChange={onChange}
+        onCreate={onCreate}
       />
-    <UserList users={users} onRemove={onRemove} onToggle={onToggle}/>
+      <UserList users={users} onToggle={onToggle} onRemove={onRemove} />
+      <div>활성사용자 수 : {count}</div>
     </>
-    //users라는 UserList의 props 값으로 위의 users배열 을 전달?
-    // 단일 <InputSample />  컴포넌트만 있으면 동작하는데 왜 위 <Wrapper>컴포넌트와 함께하면 동작 안할까?
   );
 }
 
