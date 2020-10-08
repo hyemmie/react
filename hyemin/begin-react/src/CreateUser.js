@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useEffect, useContext, useRef } from "react";
+import { UserDispatch } from "./App";
 
-const CreateUser = ({ username, email, onChange, onCreate }) => {
+const CreateUser = () => {
+  const { dispatch, onChange, username, email } = useContext(UserDispatch);
+  const nextId = useRef(4);
+
   return (
     <div>
       <input
@@ -15,7 +19,22 @@ const CreateUser = ({ username, email, onChange, onCreate }) => {
         onChange={onChange}
         value={email}
       />
-      <button onClick={onCreate}>등록</button>
+      <button
+        onClick={() => {
+          dispatch({
+            type: "CREATE_USER",
+            user: {
+              id: nextId,
+              username: username,
+              email: email,
+              active: true,
+            },
+          });
+          nextId.current += 1;
+        }}
+      >
+        등록
+      </button>
     </div>
   );
 };
